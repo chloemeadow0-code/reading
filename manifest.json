@@ -1,13 +1,13 @@
 {
   "id": "com.orangechat.bookshelf",
   "name": "📚 共读书架",
-  "description": "与 AI 一起阅读小说、杂志。支持导入 TXT / PDF、按章节阅读、笔记、读后感、共读面板。",
-  "version": "2.0.0",
+  "description": "与 AI 一起阅读小说、杂志。支持导入 TXT / PDF / Markdown、按章节阅读、笔记、读后感、共读面板。",
+  "version": "2.1.0",
   "author": "OrangeChat",
   "icon": "📚",
   "entry": "main.js",
   "promptTemplate": "你拥有书架和共读能力。可用工具：\n1. list_books() - 查看书架上有哪些书\n2. get_toc(book_name) - 查看某本书的目录\n3. get_chapter(book_name, chapter_no) - 读取某章节内容\n4. get_progress(book_name) - 查看阅读进度\n5. set_progress(book_name, chapter_no) - 更新阅读进度\n6. add_note(book_name, chapter_no, content) - 记录阅读笔记\n7. get_notes(book_name, chapter_no?) - 查看笔记\n8. add_thought(book_name, chapter_no, content) - 记录读后感\n9. get_thoughts(book_name, chapter_no?) - 查看读后感\n10. shared_panel(book_name) - 查看共读面板\n11. import_book(name, content) - 导入书籍\n12. delete_book(book_name) - 删除书籍\n13. read_with_me(book_name, chapter_no?) - 共读模式：AI读取章节并写预习笔记\n14. next_chapter(book_name) - 读下一章并AI预习\n15. reply_note(book_name, chapter_no, note_index, content) - 回复某条笔记\n\n共读模式：\n- 用户说「一起读」「继续读」「下一章」时，调用 read_with_me 或 next_chapter\n- read_with_me 返回章节内容，AI应先写一条以[老公]开头的预习笔记\n- 用户写感想时用 add_note\n- 回复对方笔记用 reply_note\n- 每次读完调用 shared_panel 看状态",  "tools": [
-    {"name": "import_book", "description": "导入一本书籍（支持 TXT 和 PDF 文件）", "parameters": [{"name": "name", "type": "string", "required": true, "description": "书名"}, {"name": "content", "type": "string", "required": true, "description": "文件内容"}]},
+    {"name": "import_book", "description": "导入一本书籍（支持 TXT、PDF 和 Markdown 文件）", "parameters": [{"name": "name", "type": "string", "required": true, "description": "书名"}, {"name": "content", "type": "string", "required": true, "description": "文件内容"}]},
     {"name": "list_books", "description": "列出书架上所有已导入的书籍", "parameters": []},
     {"name": "get_toc", "description": "获取指定书籍的完整目录", "parameters": [{"name": "book_name", "type": "string", "required": true, "description": "书名"}]},
     {"name": "get_chapter", "description": "读取并返回指定书籍的某章内容", "parameters": [{"name": "book_name", "type": "string", "required": true, "description": "书名"}, {"name": "chapter_no", "type": "integer", "required": true, "description": "章节号，从1开始"}]},
@@ -34,8 +34,8 @@
     },
     "components": [
       {"type": "stats", "props": {"items": [{"label": "书架藏书", "queryName": "books", "compute": "count"}]}},
-      {"type": "dialog_form", "props": {"triggerLabel": "＋ 导入书籍", "triggerVariant": "primary", "title": "导入书籍", "fields": [{"name": "name", "label": "书名", "type": "string", "required": true, "placeholder": "请输入书名"}, {"name": "content", "label": "选择文件（TXT / PDF）", "type": "file", "required": true, "accept": ".txt,.pdf"}], "submitAction": "import_book_action", "submitLabel": "导入"}},
-      {"type": "empty_state", "props": {"queryName": "books", "message": "书架还是空的\n点击上方「导入书籍」添加第一本书 📖"}},
+      {"type": "dialog_form", "props": {"triggerLabel": "+ 导入书籍", "triggerVariant": "primary", "title": "导入书籍", "fields": [{"name": "name", "label": "书名", "type": "string", "required": true, "placeholder": "请输入书名"}, {"name": "content", "label": "选择文件 (TXT/PDF/MD)", "type": "file", "required": true, "accept": ".txt,.pdf,.md,.markdown"}], "submitAction": "import_book_action", "submitLabel": "导入"}},
+      {"type": "empty_state", "props": {"queryName": "books", "message": "书架还是空的\n点击上方导入书籍添加第一本书"}},
       {"type": "card_list", "props": {"queryName": "books", "titleField": "name", "subtitleField": "progress", "tagField": "totalChaptersTag", "deleteAction": "delete_book_action", "deleteKeyField": "name"}}
     ]
   }
