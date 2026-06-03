@@ -1,5 +1,5 @@
 // ============================================================
-// ������ 共读书架 v2.1 — 带AI共读模式 + Markdown支持
+// ������ 共读书架 v2.1 — 带AI共读模式 + Markdown支持
 // ============================================================
 
 function safeName(name) {
@@ -157,6 +157,151 @@ function splitChapters(text) {
     }
 
     // 都没有，按3000字切
+    var chapters3 = [];
+    var CHUNK = 3000;
+    for (var m = 0; m < text.length; m += CHUNK) {
+        var chunk = text.substring(m, m + CHUNK).trim();
+        if (chunk) chapters3.push({ title: 'Part ' + (chapters3.length + 1), content: chunk });
+    }
+    return chapters3;
+}
+
+// ── 导入书籍 ───────────────────────────────────────────────
+
+// ============================================================
+// 📚 共读书架 v3.0 — 带AI共读模式 + Markdown支持 + Bridge API
+// ============================================================
+
+function safeName(name) {
+    return name.trim().replace(/[\\/:*?"<>|]/g, '_').replace(/\.\./g, '_').substring(0, 60) || 'unnamed';
+}
+
+function padNo(n) {
+    var s = String(n);
+    while (s.length < 4) s = '0' + s;
+    return s;
+}
+
+function nowStr() {
+    return new Date().toISOString().replace('T', ' ').substring(0, 19);
+}
+
+function progressStr(current, total) {
+    if (!total) return '0/0';
+    return current + '/' + total + ' (' + (current / total * 100).toFixed(1) + '%)';
+}
+
+// ── PDF文本提取 ────────────────────────────────────────────
+
+function extractTextFromPdf(data) {
+    var raw = data;
+    if (/^[A-Za-z0-9+/=\s]+$/.test(raw.trim().substring(0, 100)) && raw.length > 100) {
+        try { raw = atob(raw.trim()); } catch (e) {}
+    }
+    var textParts = [];
+    var streamRegex = /stream\r?\n?([\s\S]*?)endstream/g;
+    var match;
+    while ((match = streamRegex.exec(raw)) !== null) {
+        var sc = match[1];
+        var tjRegex = /\(([^)]*)\)\s*Tj/g;
+        var tjMatch;
+        while ((tjMatch = tjRegex.exec(sc)) !== null) {
+            if (tjMatch[1] && tjMatch[1].trim()) textParts.push(tjMatch[1]);
+        }
+        var tjArrRegex = /\[[^\]]*\]\s*TJ/g;
+        var tjArrMatch;
+        while ((tjArrMatch = tjArrRegex.exec(sc)) !== null) {
+            var arrC = tjArrMatch[1];
+            var strRe = /\(([^)]*)\)/g;
+            var strMatch, lineParts = [];
+            while ((strMatch = strRe.exec(arrC)) !== null) {
+                if (strMatch[1]) lineParts.push(strMatch[1]);
+            }
+            if (lineParts.length > 0) textParts.push(lineParts.join(''));
+        }
+    }
+    if (textParts.length === 0) {
+        var bRegex = /\([\x20-\x7E\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]{2,}\)/g;
+        var bMatch;
+        while ((bMatch = bRegex.exec(raw)) !== null) {
+            var c = bMatch[1];
+            if (!/^(PDF|Font|Type|Resource|MediaBox|ProcSet|Encoding|Width|Height|Length|Filter|Subtype|BaseFont)/.test(c)) textParts.push(c);
+        }
+    }
+    var result = textParts.join('\n');
+    return result.replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t').replace(/\\\(/g, '(').replace(/\\\)/g, ')').replace(/\\\\/g, '\\').trim();
+}
+
+function isPdfContent(content, fileName) {
+    if (fileName && /\.pdf$/i.test(fileName)) return true;
+    var data = typeof content === 'string' ? content : (content && (content.content || content.data || ''));
+    if (typeof data === 'string' && data.indexOf('%PDF') === 0) return true;
+    if (typeof data === 'string' && data.trim().indexOf('JVBERi') === 0) return true;
+    return false;
+}
+
+function extractFileContent(params) {
+    var raw = params.content;
+    var fileName = params.name || params.fileName || '';
+    var text = '';
+    var isPdf = isPdfContent(raw, fileName);
+    if (typeof raw === 'string') {
+        text = isPdf ? extractTextFromPdf(raw) : raw;
+    } else if (raw && typeof raw === 'object') {
+        var dataField = raw.content || raw.text || raw.data || raw.body || raw.buffer || raw.value || '';
+        var mimeType = raw.mimeType || raw.type || raw.contentType || '';
+        if (typeof dataField === 'string') {
+            isPdf = isPdf || mimeType === 'application/pdf' || /\.pdf$/i.test(raw.name || fileName);
+            text = isPdf ? extractTextFromPdf(dataField) : dataField;
+        } else {
+            try { text = JSON.stringify(raw); } catch (e) { text = String(raw); }
+        }
+    } else {
+        text = String(raw || '');
+    }
+    return text;
+}
+
+// ── 章节分割（支持Markdown标题）──────────────────────────
+
+var RE_CHAPTER_LINE = /^[\s\u3000]*(第\s*[零一二三四五六七八九十百千万\u96F6\u3007\d]+\s*[章节卷回篇][^\n]*|Chapter\s+\d+[^\n]*)[\s\u3000]*$/i;
+var RE_MD_HEADING = /^(#{1,6})\s+(.+)$/;
+
+function splitChapters(text) {
+    text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    if (!text) return [];
+    var lines = text.split('\n');
+    var mdHeadings = [];
+    for (var i = 0; i < lines.length; i++) {
+        var mdMatch = lines[i].match(RE_MD_HEADING);
+        if (mdMatch) mdHeadings.push({ lineIdx: i, level: mdMatch[1].length, title: mdMatch[2].trim() });
+    }
+    if (mdHeadings.length >= 2) {
+        var minLevel = 99;
+        for (var k = 0; k < mdHeadings.length; k++) { if (mdHeadings[k].level < minLevel) minLevel = mdHeadings[k].level; }
+        var splitLevel = Math.min(minLevel, 2);
+        var splitPoints = mdHeadings.filter(function(h) { return h.level <= splitLevel; });
+        if (splitPoints.length >= 2) {
+            var chapters = [];
+            for (var s = 0; s < splitPoints.length; s++) {
+                var startLine = splitPoints[s].lineIdx + 1;
+                var endLine = (s + 1 < splitPoints.length) ? splitPoints[s + 1].lineIdx : lines.length;
+                chapters.push({ title: splitPoints[s].title, content: lines.slice(startLine, endLine).join('\n').trim() || '(empty)' });
+            }
+            return chapters;
+        }
+    }
+    var chapterStarts = [];
+    for (var j = 0; j < lines.length; j++) {
+        if (RE_CHAPTER_LINE.test(lines[j])) chapterStarts.push({ lineIdx: j, title: lines[j].trim() });
+    }
+    if (chapterStarts.length > 0) {
+        var chapters2 = [];
+        for (var c = 0; c < chapterStarts.length; c++) {
+            chapters2.push({ title: chapterStarts[c].title, content: lines.slice(chapterStarts[c].lineIdx + 1, (c + 1 < chapterStarts.length) ? chapterStarts[c + 1].lineIdx : lines.length).join('\n').trim() || '(empty)' });
+        }
+        return chapters2;
+    }
     var chapters3 = [];
     var CHUNK = 3000;
     for (var m = 0; m < text.length; m += CHUNK) {
