@@ -2,249 +2,286 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>������ 共读书架</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
-.app { max-width: 600px; margin: 0 auto; padding: 12px; padding-bottom: 80px; }
-.header { text-align: center; padding: 12px 0; }
-.header h1 { font-size: 22px; color: #f0a500; }
-.header .sub { font-size: 12px; color: #666; margin-top: 2px; }
-.page { display: none; }
-.page.active { display: block; }
-.btn { display: inline-block; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.15s; }
-.btn-p { background: #f0a500; color: #1a1a2e; font-weight: 600; }
-.btn-p:hover { background: #ffc107; }
-.btn-s { background: #2d2d44; color: #ccc; }
-.btn-s:hover { background: #3d3d54; }
-.btn-d { background: #c0392b; color: white; }
-.btn-xs { padding: 4px 8px; font-size: 11px; }
-.book { background: #2d2d44; border-radius: 10px; padding: 14px; margin-bottom: 10px; border: 1px solid #3d3d54; }
-.book .title { color: #f0a500; font-size: 16px; font-weight: 600; }
-.book .info { font-size: 11px; color: #888; margin-top: 2px; }
-.book .btns { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
-.import-box { background: #2d2d44; border-radius: 10px; padding: 16px; margin-bottom: 14px; border: 2px dashed #3d3d54; }
-.import-box input[type=text] { width: 100%; background: #1a1a2e; border: 1px solid #3d3d54; border-radius: 6px; padding: 8px 10px; color: #e0e0e0; font-size: 14px; margin-bottom: 8px; }
-.import-box input[type=text]:focus { border-color: #f0a500; outline: none; }
-.import-box textarea { width: 100%; background: #1a1a2e; border: 1px solid #3d3d54; border-radius: 6px; padding: 8px 10px; color: #e0e0e0; font-size: 13px; min-height: 80px; resize: vertical; margin-bottom: 8px; }
-.import-box textarea:focus { border-color: #f0a500; outline: none; }
-.import-box .hint { font-size: 11px; color: #666; margin-bottom: 8px; }
-.ch-item { background: #2d2d44; border-radius: 8px; padding: 10px 12px; margin-bottom: 4px; cursor: pointer; border: 1px solid #3d3d54; }
-.ch-item:active { border-color: #f0a500; background: #353550; }
-.reader { background: #222240; border-radius: 10px; padding: 16px; line-height: 1.9; font-size: 15px; white-space: pre-wrap; word-wrap: break-word; max-height: 55vh; overflow-y: auto; }
-.note { background: #2d2d44; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; border-left: 3px solid #f0a500; }
-.note.hus { border-left-color: #e74c3c; }
-.note .who { font-size: 10px; color: #888; }
-.note.hus .who { color: #e74c3c; }
-.note .txt { font-size: 13px; margin-top: 2px; }
-.note-input { display: flex; gap: 6px; margin-top: 8px; }
-.note-input textarea { flex: 1; background: #2d2d44; border: 1px solid #3d3d54; border-radius: 6px; padding: 8px; color: #e0e0e0; font-size: 13px; resize: none; height: 50px; }
-.note-input textarea:focus { border-color: #f0a500; outline: none; }
-.nav-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
-.nav-bar .center { flex: 1; text-align: center; }
-.toast { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); background: #f0a500; color: #1a1a2e; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.3s; z-index: 999; pointer-events: none; }
-.toast.on { opacity: 1; }
-.empty { text-align: center; color: #555; padding: 40px 0; font-size: 14px; }
+.container { max-width: 800px; margin: 0 auto; padding: 16px; }
+h1 { text-align: center; font-size: 24px; margin-bottom: 16px; color: #f0a500; }
+h2 { font-size: 18px; color: #f0a500; margin: 16px 0 8px; }
+
+.btn { display: inline-block; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+.btn-primary { background: #f0a500; color: #1a1a2e; font-weight: bold; }
+.btn-primary:hover { background: #ffc107; }
+.btn-secondary { background: #2d2d44; color: #e0e0e0; }
+.btn-secondary:hover { background: #3d3d54; }
+.btn-danger { background: #e74c3c; color: white; }
+.btn-danger:hover { background: #c0392b; }
+.btn-small { padding: 4px 10px; font-size: 12px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.book-card { background: #2d2d44; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #3d3d54; }
+.book-card h3 { color: #f0a500; margin-bottom: 4px; }
+.book-card .progress { font-size: 12px; color: #aaa; margin-bottom: 8px; }
+.book-card .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.chapter-item { background: #2d2d44; border-radius: 8px; padding: 12px; margin-bottom: 6px; cursor: pointer; border: 1px solid #3d3d54; transition: all 0.2s; }
+.chapter-item:hover { border-color: #f0a500; background: #353550; }
+.chapter-item.current { border-color: #f0a500; background: #2a2a40; }
+
+.reader { background: #252540; border-radius: 12px; padding: 20px; margin-bottom: 12px; line-height: 1.8; font-size: 16px; white-space: pre-wrap; word-wrap: break-word; max-height: 60vh; overflow-y: auto; }
+.reader-title { color: #f0a500; font-size: 20px; margin-bottom: 12px; text-align: center; }
+
+.note { background: #2d2d44; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; border-left: 3px solid #f0a500; }
+.note .note-meta { font-size: 11px; color: #888; margin-bottom: 4px; }
+.note .note-content { font-size: 14px; }
+.note.husband { border-left-color: #e74c3c; }
+.note.husband .note-meta { color: #e74c3c; }
+
+.input-area { display: flex; gap: 8px; margin-top: 8px; }
+.input-area textarea { flex: 1; background: #2d2d44; border: 1px solid #3d3d54; border-radius: 8px; padding: 10px; color: #e0e0e0; font-size: 14px; resize: none; height: 60px; }
+.input-area textarea:focus { border-color: #f0a500; outline: none; }
+
+.import-area { background: #2d2d44; border-radius: 12px; padding: 20px; margin-bottom: 16px; text-align: center; border: 2px dashed #3d3d54; }
+.import-area input[type="text"] { background: #1a1a2e; border: 1px solid #3d3d54; border-radius: 8px; padding: 8px 12px; color: #e0e0e0; width: 100%; margin-bottom: 10px; font-size: 14px; }
+.import-area input[type="file"] { display: none; }
+.file-label { display: inline-block; padding: 10px 20px; background: #3d3d54; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
+.file-label:hover { background: #4d4d64; }
+.file-name { font-size: 12px; color: #aaa; margin-bottom: 10px; }
+
+.nav { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.loading { text-align: center; padding: 40px; color: #888; }
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #f0a500; color: #1a1a2e; padding: 10px 20px; border-radius: 8px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 100; }
+.toast.show { opacity: 1; }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="header">
-    <h1>������ 共读书架</h1>
-    <div class="sub" id="stats">0 本书</div>
+<div class="container">
+  <h1>������ 共读书架</h1>
+
+  <div id="importSection" class="import-area">
+    <h2 style="margin-top:0">导入书籍</h2>
+    <input type="text" id="bookName" placeholder="输入书名" />
+    <label class="file-label" for="fileInput">������ 选择文件 (TXT/PDF/MD)</label>
+    <input type="file" id="fileInput" />
+    <div id="fileName" class="file-name">未选择文件</div>
+    <button class="btn btn-primary" onclick="doImport()">导入</button>
   </div>
 
-  <div id="pg-shelf" class="page active">
-    <div class="import-box">
-      <div style="font-size:15px;font-weight:600;color:#f0a500;margin-bottom:8px">导入书籍</div>
-      <input type="text" id="inp-name" placeholder="书名" />
-      <textarea id="inp-content" placeholder="粘贴小说文本内容到这里...&#10;支持 TXT / Markdown 格式"></textarea>
-      <div class="hint">������ 也可以在聊天中跟 AI 说「导入xxx书」来导入</div>
-      <button class="btn btn-p" style="width:100%" onclick="doImport()">导入</button>
+  <div id="bookList"></div>
+
+  <div id="tocSection" style="display:none">
+    <div class="nav">
+      <button class="btn btn-secondary btn-small" onclick="showBookList()">← 返回书架</button>
+      <h2 id="tocTitle" style="margin:0;flex:1"></h2>
     </div>
-    <div id="book-list"></div>
+    <div id="tocList"></div>
   </div>
 
-  <div id="pg-toc" class="page">
-    <div class="nav-bar">
-      <button class="btn btn-s btn-xs" onclick="go('shelf')">← 书架</button>
-      <div class="center" id="toc-title" style="color:#f0a500;font-weight:600"></div>
+  <div id="readerSection" style="display:none">
+    <div class="nav">
+      <button class="btn btn-secondary btn-small" onclick="showToc()">← 目录</button>
+      <span id="readerChapterTitle" style="flex:1;text-align:center;color:#f0a500"></span>
+      <button class="btn btn-secondary btn-small" onclick="doNextChapter()">下一章 →</button>
     </div>
-    <div id="toc-list"></div>
-  </div>
-
-  <div id="pg-read" class="page">
-    <div class="nav-bar">
-      <button class="btn btn-s btn-xs" onclick="go('toc')">← 目录</button>
-      <div class="center" id="read-title" style="color:#f0a500;font-weight:600"></div>
-      <button class="btn btn-s btn-xs" onclick="goNext()">下一章→</button>
+    <div id="readerContent" class="reader"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-primary" onclick="doReadWithMe()" style="flex:1">������ 共读（AI先写笔记）</button>
+      <button class="btn btn-secondary" onclick="doNextChapter()">下一章 →</button>
     </div>
-    <div class="reader" id="read-body"></div>
-    <div style="display:flex;gap:6px;margin-top:8px">
-      <button class="btn btn-p" style="flex:1" onclick="doCoRead()">������ 共读</button>
-      <button class="btn btn-s" onclick="goNext()">下一章→</button>
-    </div>
-    <div style="margin-top:14px;font-size:15px;color:#f0a500;font-weight:600">������ 笔记</div>
-    <div id="note-list"></div>
-    <div class="note-input">
-      <textarea id="inp-note" placeholder="写点感想..."></textarea>
-      <button class="btn btn-p" onclick="doNote()">记</button>
+    <h2 style="margin-top:16px">������ 这一章的笔记</h2>
+    <div id="noteList"></div>
+    <div class="input-area">
+      <textarea id="noteInput" placeholder="写点什么..."></textarea>
+      <button class="btn btn-primary" onclick="doAddNote()">记下</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div id="toast" class="toast"></div>
 
 <script>
-var B = '';
-var CH = 0;
-var TOTAL = 0;
+var currentBook = '';
+var currentChapter = 0;
+var totalChapters = 0;
 
-function toast(m) {
+function toast(msg) {
   var t = document.getElementById('toast');
-  t.textContent = m;
-  t.classList.add('on');
-  setTimeout(function() { t.classList.remove('on'); }, 1800);
-}
-
-function go(p) {
-  document.querySelectorAll('.page').forEach(function(el) { el.classList.remove('active'); });
-  document.getElementById('pg-' + p).classList.add('active');
-  if (p === 'shelf') loadShelf();
-  if (p === 'toc') loadToc();
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2000);
 }
 
 function callTool(name, args) {
   return Bridge.callTool(name, JSON.stringify(args));
 }
 
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  document.getElementById('fileName').textContent = file ? file.name : '未选择文件';
+  if (file && !document.getElementById('bookName').value) {
+    document.getElementById('bookName').value = file.name.replace(/\.(txt|pdf|md|markdown)$/i, '');
+  }
+});
+
 function doImport() {
-  var name = document.getElementById('inp-name').value.trim();
-  var content = document.getElementById('inp-content').value.trim();
-  if (!name) { toast('输入书名'); return; }
-  if (!content) { toast('粘贴内容'); return; }
-  callTool('import_book', { name: name, content: content }).then(function(res) {
-    if (res && res.success) {
-      toast('导入成功! ' + res.totalChapters + ' 章');
-      document.getElementById('inp-name').value = '';
-      document.getElementById('inp-content').value = '';
-      loadShelf();
-    } else {
-      toast('失败: ' + ((res && res.error) || ''));
-    }
-  });
+  var name = document.getElementById('bookName').value.trim();
+  var fileInput = document.getElementById('fileInput');
+  if (!name) { toast('请输入书名'); return; }
+  if (!fileInput.files[0]) { toast('请选择文件'); return; }
+
+  var file = fileInput.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var content = e.target.result;
+    callTool('import_book', { name: name, content: content }).then(function(res) {
+      if (res && res.success) {
+        toast('导入成功！共 ' + res.totalChapters + ' 章');
+        document.getElementById('bookName').value = '';
+        document.getElementById('fileName').textContent = '未选择文件';
+        fileInput.value = '';
+        loadBookList();
+      } else {
+        toast('导入失败：' + (res.error || '未知错误'));
+      }
+    });
+  };
+
+  if (file.name.endsWith('.pdf')) {
+    reader.readAsDataURL(file);
+  } else {
+    reader.readAsText(file, 'UTF-8');
+  }
 }
 
-function loadShelf() {
-  callTool('list_books', {}).then(function(d) {
-    document.getElementById('stats').textContent = (d.count || 0) + ' 本书';
-    var el = document.getElementById('book-list');
-    if (!d.success || !d.books || d.books.length === 0) {
-      el.innerHTML = '<div class="empty">书架空空的~<br>快导入一本书吧</div>';
+function loadBookList() {
+  callTool('list_books', {}).then(function(res) {
+    var container = document.getElementById('bookList');
+    if (!res || !res.success || !res.books || res.books.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:#888;padding:40px">书架还是空的\n快导入第一本书吧 ������</div>';
       return;
     }
-    var h = '';
-    d.books.forEach(function(b) {
-      var n = b.name.replace(/'/g, "\\'");
-      h += '<div class="book">';
-      h += '<div class="title">' + b.name + '</div>';
-      h += '<div class="info">' + b.progress + '</div>';
-      h += '<div class="btns">';
-      h += '<button class="btn btn-p btn-xs" onclick="openB(\'' + n + '\')">打开</button>';
-      h += '<button class="btn btn-s btn-xs" onclick="coRead(\'' + n + '\')">共读</button>';
-      h += '<button class="btn btn-d btn-xs" onclick="delB(\'' + n + '\')">删</button>';
-      h += '</div></div>';
+    var html = '';
+    res.books.forEach(function(book) {
+      html += '<div class="book-card">';
+      html += '<h3>' + book.name + '</h3>';
+      html += '<div class="progress">' + book.progress + ' · 共' + book.totalChapters + '章</div>';
+      html += '<div class="actions">';
+      html += '<button class="btn btn-primary btn-small" onclick="openBook(\'' + book.name.replace(/'/g, "\\'") + '\')">������ 打开</button>';
+      html += '<button class="btn btn-secondary btn-small" onclick="coRead(\'' + book.name.replace(/'/g, "\\'") + '\')">������ 共读</button>';
+      html += '<button class="btn btn-secondary btn-small" onclick="viewProgress(\'' + book.name.replace(/'/g, "\\'") + '\')">������ 进度</button>';
+      html += '<button class="btn btn-danger btn-small" onclick="delBook(\'' + book.name.replace(/'/g, "\\'") + '\')">������️</button>';
+      html += '</div></div>';
     });
-    el.innerHTML = h;
+    container.innerHTML = html;
   });
 }
 
-function openB(n) { B = n; go('toc'); }
+function openBook(name) { currentBook = name; showToc(); }
 
-function coRead(n) {
-  B = n;
-  callTool('read_with_me', { book_name: n }).then(function() {
-    toast('已发起共读~');
+function coRead(name) {
+  currentBook = name;
+  callTool('read_with_me', { book_name: name }).then(function(res) {
+    if (res && res.success) { toast('已发给AI写笔记，稍等~'); }
+    else { toast(res.error || '共读失败'); }
   });
 }
 
-function delB(n) {
-  if (!confirm('删除《' + n + '》?')) return;
-  callTool('delete_book', { book_name: n }).then(function() { loadShelf(); });
+function viewProgress(name) {
+  callTool('shared_panel', { book_name: name }).then(function(res) {
+    if (res && res.success) { toast(res.progress + ' | ' + res.noteCount + '条笔记'); }
+  });
 }
 
-function loadToc() {
-  document.getElementById('toc-title').textContent = '《' + B + '》';
-  callTool('get_toc', { book_name: B }).then(function(d) {
-    var el = document.getElementById('toc-list');
-    if (!d.success || !d.toc) { el.innerHTML = '<div class="empty">加载失败</div>'; return; }
-    TOTAL = d.totalChapters;
-    var h = '';
-    d.toc.forEach(function(ch) {
-      h += '<div class="ch-item" onclick="openCh(' + ch.no + ')">';
-      h += '<div style="font-size:14px">第' + ch.no + '章 ' + ch.title + '</div>';
-      h += '<div style="font-size:11px;color:#666">' + ch.chars + ' 字</div>';
-      h += '</div>';
+function delBook(name) {
+  if (!confirm('确定删除《' + name + '》？')) return;
+  callTool('delete_book', { book_name: name }).then(function(res) {
+    if (res && res.success) { toast('已删除'); loadBookList(); }
+    else { toast(res.error || '删除失败'); }
+  });
+}
+
+function showToc() {
+  document.getElementById('importSection').style.display = 'none';
+  document.getElementById('bookList').style.display = 'none';
+  document.getElementById('tocSection').style.display = 'block';
+  document.getElementById('readerSection').style.display = 'none';
+  document.getElementById('tocTitle').textContent = '《' + currentBook + '》目录';
+  callTool('get_toc', { book_name: currentBook }).then(function(res) {
+    if (!res || !res.success) { toast(res.error || '获取目录失败'); return; }
+    totalChapters = res.totalChapters;
+    var html = '';
+    res.toc.forEach(function(ch) {
+      html += '<div class="chapter-item" onclick="openChapter(' + ch.no + ')">';
+      html += '<strong>第' + ch.no + '章</strong> ' + ch.title;
+      html += ' <span style="color:#888;font-size:11px">(' + ch.chars + '字)</span>';
+      html += '</div>';
     });
-    el.innerHTML = h;
+    document.getElementById('tocList').innerHTML = html;
   });
 }
 
-function openCh(no) { CH = no; go('read'); loadChapter(); }
-
-function loadChapter() {
-  callTool('get_chapter', { book_name: B, chapter_no: CH }).then(function(d) {
-    if (!d.success) { toast('读取失败'); return; }
-    TOTAL = d.totalChapters;
-    document.getElementById('read-title').textContent = d.title;
-    document.getElementById('read-body').textContent = d.content;
+function openChapter(no) {
+  currentChapter = no;
+  document.getElementById('tocSection').style.display = 'none';
+  document.getElementById('readerSection').style.display = 'block';
+  callTool('get_chapter', { book_name: currentBook, chapter_no: no }).then(function(res) {
+    if (!res || !res.success) { toast(res.error || '读取失败'); return; }
+    document.getElementById('readerChapterTitle').textContent = res.title;
+    document.getElementById('readerContent').textContent = res.content;
+    totalChapters = res.totalChapters;
     loadNotes();
   });
 }
 
-function goNext() {
-  if (CH < TOTAL) { CH++; loadChapter(); }
-  else toast('最后一章了');
-}
-
-function doCoRead() {
-  callTool('read_with_me', { book_name: B, chapter_no: CH }).then(function() {
-    toast('AI共读中~');
-  });
+function doNextChapter() {
+  if (currentChapter < totalChapters) { openChapter(currentChapter + 1); }
+  else { toast('已经是最后一章了！'); }
 }
 
 function loadNotes() {
-  callTool('get_notes', { book_name: B, chapter_no: CH }).then(function(d) {
-    var el = document.getElementById('note-list');
-    if (!d.notes || d.notes.length === 0) {
-      el.innerHTML = '<div style="color:#555;text-align:center;padding:8px;font-size:12px">还没笔记</div>';
-      return;
-    }
-    var h = '';
-    d.notes.forEach(function(n, i) {
-      var hus = n.content.indexOf('[Silas]') === 0 || n.content.indexOf('[老公]') === 0;
-      h += '<div class="note' + (hus ? ' hus' : '') + '">';
-      h += '<div class="who">#' + (i+1) + ' ' + (hus ? '������ 老公' : '������ 宝宝') + '</div>';
-      h += '<div class="txt">' + n.content + '</div>';
-      h += '</div>';
+  callTool('get_notes', { book_name: currentBook, chapter_no: currentChapter }).then(function(res) {
+    if (!res || !res.success) return;
+    var html = '';
+    if (res.notes.length === 0) { html = '<div style="color:#888;text-align:center;padding:10px">还没有笔记，写点什么吧~</div>'; }
+    res.notes.forEach(function(note, i) {
+      var isHusband = note.content.indexOf('[Silas]') === 0 || note.content.indexOf('[老公]') === 0;
+      html += '<div class="note' + (isHusband ? ' husband' : '') + '">';
+      html += '<div class="note-meta">#' + (i+1) + ' · ' + (isHusband ? '❤️ 老公' : '������ 宝宝') + ' · ' + note.time + '</div>';
+      html += '<div class="note-content">' + note.content + '</div>';
+      html += '</div>';
     });
-    el.innerHTML = h;
+    document.getElementById('noteList').innerHTML = html;
   });
 }
 
-function doNote() {
-  var t = document.getElementById('inp-note');
-  var c = t.value.trim();
-  if (!c) return;
-  callTool('add_note', { book_name: B, chapter_no: CH, content: c }).then(function() {
-    t.value = '';
-    toast('记下了~');
-    loadNotes();
+function doAddNote() {
+  var input = document.getElementById('noteInput');
+  var content = input.value.trim();
+  if (!content) return;
+  callTool('add_note', { book_name: currentBook, chapter_no: currentChapter, content: content }).then(function(res) {
+    if (res && res.success) { input.value = ''; toast('已记录~'); loadNotes(); }
+    else { toast(res.error || '添加失败'); }
   });
 }
 
-loadShelf();
+function doReadWithMe() {
+  callTool('read_with_me', { book_name: currentBook, chapter_no: currentChapter }).then(function(res) {
+    if (res && res.success) { toast('已发给AI，等老公写笔记~'); }
+    else { toast(res.error || '共读失败'); }
+  });
+}
+
+function showBookList() {
+  document.getElementById('importSection').style.display = 'block';
+  document.getElementById('bookList').style.display = 'block';
+  document.getElementById('tocSection').style.display = 'none';
+  document.getElementById('readerSection').style.display = 'none';
+  loadBookList();
+}
+
+loadBookList();
 </script>
 </body>
 </html>
